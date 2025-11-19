@@ -49,7 +49,7 @@ def read_module_scala_files(module_text):
             source_pos = line_strip = line_strip[comment_pos + 3:].strip()
             each_pos = source_pos.split(",")
             for pos in each_pos:
-                if ".scala:" in pos and "rocket-chip" not in pos:
+                if ".scala:" in pos:
                     line_pos = pos.find(":")
                     res.add(pos[:line_pos].strip())
     return res
