@@ -77,14 +77,14 @@ def output_in_tree(modules_dict, root_module="XSTop", indent="  ", max_depth=10)
     for instance_name, module_name in child_modules.items():
         output_in_tree(modules_dict, module_name, indent + "  ", max_depth - 1)
 
-def count_flat(cur_module, hier, scala_files, src_map, res_dict, res_src_dict):
+def count_flat(cur_module, hier, scala_files, res_dict, res_src_dict):
     if cur_module in res_dict:
         return
-    res_dict[cur_module] = src_map[cur_module].count("\n") + 1
+    res_dict[cur_module] = set([cur_module])
     res_src_dict[cur_module] = scala_files[cur_module].copy()
     for child_module in hier.get(cur_module, {}).values():
-        count_flat(child_module, hier, scala_files, src_map, res_dict, res_src_dict)
-        res_dict[cur_module] += res_dict[child_module]
+        count_flat(child_module, hier, scala_files, res_dict, res_src_dict)
+        res_dict[cur_module].update(res_dict[child_module])
         res_src_dict[cur_module].update(res_src_dict[child_module])
 
 def cal_src_count(src_dict, src_count_dict, default_folder=None):
@@ -111,6 +111,13 @@ def cal_src_count(src_dict, src_count_dict, default_folder=None):
                     print(f"Warning: Scala source file {scala_file} not found.", file=sys.stderr)
                     line_cache[scala_file] = 0
                     src_count_dict[module_name] = 0
+
+def cal_verilog_count(verilog_dict, src_map):
+    count_dict = dict()
+    for module_name, module_set in verilog_dict.items():
+        for mod in module_set:
+            count_dict[module_name] = count_dict.get(module_name, 0) + src_map.get(mod, "").count("\n")
+    return count_dict
 
 def cal_count(yqh_count, nh_count, kmh_count, kmhv2_count, kmhv3_count, output_file):
     res = {
@@ -206,18 +213,23 @@ if __name__ == "__main__":
     # output_in_tree(kmh_hier)
     # output_in_tree(kmhv2_hier)
     # output_in_tree(kmhv3_hier)
-    yqh_count, nh_count, kmh_count, kmhv2_count, kmhv3_count = dict(), dict(), dict(), dict(), dict()
+    yqh_verilog, nh_verilog, kmh_verilog, kmhv2_verilog, kmhv3_verilog = dict(), dict(), dict(), dict(), dict()
     yqh_src, nh_src, kmh_src, kmhv2_src, kmhv3_src = dict(), dict(), dict(), dict(), dict()
-    count_flat("XSTop", yqh_hier, yqh_scala, yqh, yqh_count, yqh_src)
-    count_flat("XSTop", nh_hier, nh_scala, nh, nh_count, nh_src)
-    count_flat("XSTop", kmh_hier, kmh_scala, kmh, kmh_count, kmh_src)
-    count_flat("XSTop", kmhv2_hier, kmhv2_scala, kmhv2, kmhv2_count, kmhv2_src)
-    count_flat("XSTop", kmhv3_hier, kmhv3_scala, kmhv3, kmhv3_count, kmhv3_src)
+    count_flat("XSTop", yqh_hier, yqh_scala, yqh_verilog, yqh_src)
+    count_flat("XSTop", nh_hier, nh_scala, nh_verilog, nh_src)
+    count_flat("XSTop", kmh_hier, kmh_scala, kmh_verilog, kmh_src)
+    count_flat("XSTop", kmhv2_hier, kmhv2_scala, kmhv2_verilog, kmhv2_src)
+    count_flat("XSTop", kmhv3_hier, kmhv3_scala, kmhv3_verilog, kmhv3_src)
     yqh_scala_count, nh_scala_count, kmh_scala_count, kmhv2_scala_count, kmhv3_scala_count = dict(), dict(), dict(), dict(), dict()
     cal_src_count(yqh_src, yqh_scala_count, "/mnt/data/xs/xs-env/yanqihu/")
     cal_src_count(nh_src, nh_scala_count, "/mnt/data/xs/xs-env/nanhu/")
     cal_src_count(kmh_src, kmh_scala_count, "/mnt/data/xs/xs-env/kunminghu/")
     cal_src_count(kmhv2_src, kmhv2_scala_count, "/mnt/data/xs/xs-env/kunminghu-v2/")
     cal_src_count(kmhv3_src, kmhv3_scala_count, "/mnt/data/xs/xs-env/XiangShan/")
+    yqh_count = cal_verilog_count(yqh_verilog, yqh)
+    nh_count = cal_verilog_count(nh_verilog, nh)
+    kmh_count = cal_verilog_count(kmh_verilog, kmh)
+    kmhv2_count = cal_verilog_count(kmhv2_verilog, kmhv2)
+    kmhv3_count = cal_verilog_count(kmhv3_verilog, kmhv3)
     cal_count(yqh_count, nh_count, kmh_count, kmhv2_count, kmhv3_count, "verilog.csv")
     cal_count(yqh_scala_count, nh_scala_count, kmh_scala_count, kmhv2_scala_count, kmhv3_scala_count, "scala.csv")
