@@ -113,7 +113,6 @@ def cal_src_count(src_dict, src_count_dict, default_folder=None):
                 if not read_success:
                     print(f"Warning: Scala source file {scala_file} not found.", file=sys.stderr)
                     line_cache[scala_file] = 0
-                    src_count_dict[module_name] = 0
 
 def cal_verilog_count(verilog_dict, src_map):
     count_dict = dict()
