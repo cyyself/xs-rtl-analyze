@@ -77,7 +77,7 @@ def output_in_tree(buf, modules_dict, verilog_count, scala_count, root_module="X
         return
     buf.append(f"{indent}{root_module} ({scala_count.get(root_module, 0)}/{verilog_count.get(root_module, 0)})")
     child_modules = modules_dict.get(root_module, {})
-    for instance_name, module_name in sorted(child_modules.items(), key=lambda x: x[0]):
+    for instance_name, module_name in sorted(child_modules.items(), key=lambda x: x[1]):
         output_in_tree(buf, modules_dict, verilog_count, scala_count, module_name, indent + "  ", max_depth - 1)
 
 def count_flat(cur_module, hier, scala_files, res_dict, res_src_dict):
