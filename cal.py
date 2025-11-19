@@ -111,7 +111,7 @@ def cal_src_count(src_dict, src_count_dict, default_folder=None):
                     line_cache[scala_file] = 0
                     src_count_dict[module_name] = 0
 
-def cal_count(yqh_count, nh_count, kmh_count, kmhv2_count):
+def cal_count(yqh_count, nh_count, kmh_count, kmhv2_count, kmhv3_count):
     res = {
         "yqh": {
             "Frontend": yqh_count["Frontend"] - yqh_count["ICache"],
@@ -144,11 +144,19 @@ def cal_count(yqh_count, nh_count, kmh_count, kmhv2_count):
             "ICache": kmhv2_count["ICache"],
             "DCache": kmhv2_count["DCacheWrapper"],
             "L2Top": kmhv2_count["L2Top"]
-        }
+        },
+        "kmhv3": {
+            "Frontend": kmhv3_count["Frontend"] - kmhv3_count["ICache"],
+            "Backend": kmhv3_count["Backend"],
+            "MemBlock": kmhv3_count["MemBlock"] - kmhv3_count["DCacheWrapper"],
+            "ICache": kmhv3_count["ICache"],
+            "DCache": kmhv3_count["DCacheWrapper"],
+            "L2Top": kmhv3_count["L2Top"]
+        },
     }
     # output in csv
     print("Part,Frontend,Backend,MemBlock,ICache,DCache,L2Top")
-    for part in ["yqh", "nh", "kmh", "kmhv2"]:
+    for part in ["yqh", "nh", "kmh", "kmhv2", "kmhv3"]:
         frontend = res[part]["Frontend"]
         backend = res[part]["Backend"]
         memblock = res[part]["MemBlock"]
@@ -158,7 +166,7 @@ def cal_count(yqh_count, nh_count, kmh_count, kmhv2_count):
         print(f"{part},{frontend},{backend},{memblock},{icache},{dcache},{l2top}")
 
 if __name__ == "__main__":
-    yqh, nh, kmh, kmhv2 = dict(), dict(), dict(), dict()
+    yqh, nh, kmh, kmhv2, kmhv3 = dict(), dict(), dict(), dict(), dict()
     for path in pathlib.Path("verilog/yanqihu").rglob("*.sv"):
         file = path.name
         with open(path, "r") as f:
@@ -179,25 +187,34 @@ if __name__ == "__main__":
         with open(path, "r") as f:
             kmhv2_part = split_src(f.read())
             kmhv2.update(kmhv2_part)
+    for path in pathlib.Path("verilog/kunminghu_v3").rglob("*.sv"):
+        file = path.name
+        with open(path, "r") as f:
+            kmhv3_part = split_src(f.read())
+            kmhv3.update(kmhv3_part)
     yqh_hier, yqh_scala = get_hier(yqh)
     nh_hier, nh_scala = get_hier(nh)
     kmh_hier, kmh_scala = get_hier(kmh)
     kmhv2_hier, kmhv2_scala = get_hier(kmhv2)
+    kmhv3_hier, kmhv3_scala = get_hier(kmhv3)
     # output_in_tree(yqh_hier)
     # output_in_tree(nh_hier)
     # output_in_tree(kmh_hier)
     # output_in_tree(kmhv2_hier)
-    yqh_count, nh_count, kmh_count, kmhv2_count = dict(), dict(), dict(), dict()
-    yqh_src, nh_src, kmh_src, kmhv2_src = dict(), dict(), dict(), dict()
+    # output_in_tree(kmhv3_hier)
+    yqh_count, nh_count, kmh_count, kmhv2_count, kmhv3_count = dict(), dict(), dict(), dict(), dict()
+    yqh_src, nh_src, kmh_src, kmhv2_src, kmhv3_src = dict(), dict(), dict(), dict(), dict()
     count_flat("XSTop", yqh_hier, yqh_scala, yqh, yqh_count, yqh_src)
     count_flat("XSTop", nh_hier, nh_scala, nh, nh_count, nh_src)
     count_flat("XSTop", kmh_hier, kmh_scala, kmh, kmh_count, kmh_src)
     count_flat("XSTop", kmhv2_hier, kmhv2_scala, kmhv2, kmhv2_count, kmhv2_src)
-    yqh_scala_count, nh_scala_count, kmh_scala_count, kmhv2_scala_count = dict(), dict(), dict(), dict()
+    count_flat("XSTop", kmhv3_hier, kmhv3_scala, kmhv3, kmhv3_count, kmhv3_src)
+    yqh_scala_count, nh_scala_count, kmh_scala_count, kmhv2_scala_count, kmhv3_scala_count = dict(), dict(), dict(), dict(), dict()
     cal_src_count(yqh_src, yqh_scala_count, "/mnt/data/xs/xs-env/yanqihu/")
     cal_src_count(nh_src, nh_scala_count, "/mnt/data/xs/xs-env/nanhu/")
     cal_src_count(kmh_src, kmh_scala_count, "/mnt/data/xs/xs-env/kunminghu/")
     cal_src_count(kmhv2_src, kmhv2_scala_count, "/mnt/data/xs/xs-env/kunminghu-v2/")
-    cal_count(yqh_count, nh_count, kmh_count, kmhv2_count)
+    cal_src_count(kmhv3_src, kmhv3_scala_count, "/mnt/data/xs/xs-env/XiangShan/")
+    cal_count(yqh_count, nh_count, kmh_count, kmhv2_count, kmhv3_count)
     print("\nScala Source Line Count:")
-    cal_count(yqh_scala_count, nh_scala_count, kmh_scala_count, kmhv2_scala_count)
+    cal_count(yqh_scala_count, nh_scala_count, kmh_scala_count, kmhv2_scala_count, kmhv3_scala_count)
