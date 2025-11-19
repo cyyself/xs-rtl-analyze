@@ -72,13 +72,13 @@ def get_hier(src_dict):
                 to_process.append(child_module)
     return (res, module_scala)
 
-def output_in_tree(modules_dict, root_module="XSTop", indent="  ", max_depth=10):
+def output_in_tree(buf, modules_dict, verilog_count, scala_count, root_module="XSTop", indent="", max_depth=10):
     if max_depth == 0:
         return
-    print(f"{indent}{root_module}")
+    buf.append(f"{indent}{root_module} ({scala_count.get(root_module, 0)}/{verilog_count.get(root_module, 0)})")
     child_modules = modules_dict.get(root_module, {})
-    for instance_name, module_name in child_modules.items():
-        output_in_tree(modules_dict, module_name, indent + "  ", max_depth - 1)
+    for instance_name, module_name in sorted(child_modules.items(), key=lambda x: x[0]):
+        output_in_tree(buf, modules_dict, verilog_count, scala_count, module_name, indent + "  ", max_depth - 1)
 
 def count_flat(cur_module, hier, scala_files, res_dict, res_src_dict):
     if cur_module in res_dict:
@@ -210,11 +210,6 @@ if __name__ == "__main__":
     kmh_hier, kmh_scala = get_hier(kmh)
     kmhv2_hier, kmhv2_scala = get_hier(kmhv2)
     kmhv3_hier, kmhv3_scala = get_hier(kmhv3)
-    # output_in_tree(yqh_hier)
-    # output_in_tree(nh_hier)
-    # output_in_tree(kmh_hier)
-    # output_in_tree(kmhv2_hier)
-    # output_in_tree(kmhv3_hier)
     yqh_verilog, nh_verilog, kmh_verilog, kmhv2_verilog, kmhv3_verilog = dict(), dict(), dict(), dict(), dict()
     yqh_src, nh_src, kmh_src, kmhv2_src, kmhv3_src = dict(), dict(), dict(), dict(), dict()
     count_flat("XSTop", yqh_hier, yqh_scala, yqh_verilog, yqh_src)
@@ -235,3 +230,23 @@ if __name__ == "__main__":
     kmhv3_count = cal_verilog_count(kmhv3_verilog, kmhv3)
     cal_count(yqh_count, nh_count, kmh_count, kmhv2_count, kmhv3_count, "verilog.csv")
     cal_count(yqh_scala_count, nh_scala_count, kmh_scala_count, kmhv2_scala_count, kmhv3_scala_count, "scala.csv")
+    with open("yqh_hier.txt", "w") as f:
+        buf = []
+        output_in_tree(buf, yqh_hier, yqh_count, yqh_scala_count)
+        f.write("\n".join(buf))
+    with open("nh_hier.txt", "w") as f:
+        buf = []
+        output_in_tree(buf, nh_hier, nh_count, nh_scala_count)
+        f.write("\n".join(buf))
+    with open("kmh_hier.txt", "w") as f:
+        buf = []
+        output_in_tree(buf, kmh_hier, kmh_count, kmh_scala_count)
+        f.write("\n".join(buf))
+    with open("kmhv2_hier.txt", "w") as f:
+        buf = []
+        output_in_tree(buf, kmhv2_hier, kmhv2_count, kmhv2_scala_count)
+        f.write("\n".join(buf))
+    with open("kmhv3_hier.txt", "w") as f:
+        buf = []
+        output_in_tree(buf, kmhv3_hier, kmhv3_count, kmhv3_scala_count)
+        f.write("\n".join(buf))
