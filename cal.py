@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import pathlib
+import sys
 
 def split_src(text):
     res = dict()
@@ -107,11 +108,11 @@ def cal_src_count(src_dict, src_count_dict, default_folder=None):
                     except FileNotFoundError:
                         continue
                 if not read_success:
-                    print(f"Warning: Scala source file {scala_file} not found.")
+                    print(f"Warning: Scala source file {scala_file} not found.", file=sys.stderr)
                     line_cache[scala_file] = 0
                     src_count_dict[module_name] = 0
 
-def cal_count(yqh_count, nh_count, kmh_count, kmhv2_count, kmhv3_count):
+def cal_count(yqh_count, nh_count, kmh_count, kmhv2_count, kmhv3_count, output_file):
     res = {
         "yqh": {
             "Frontend": yqh_count["Frontend"] - yqh_count["ICache"],
@@ -155,7 +156,8 @@ def cal_count(yqh_count, nh_count, kmh_count, kmhv2_count, kmhv3_count):
         },
     }
     # output in csv
-    print("Part,Frontend,Backend,MemBlock,ICache,DCache,L2Top")
+    buf = ""
+    buf += "Part,Frontend,Backend,MemBlock,ICache,DCache,L2Top\n"
     for part in ["yqh", "nh", "kmh", "kmhv2", "kmhv3"]:
         frontend = res[part]["Frontend"]
         backend = res[part]["Backend"]
@@ -163,7 +165,9 @@ def cal_count(yqh_count, nh_count, kmh_count, kmhv2_count, kmhv3_count):
         icache = res[part]["ICache"]
         dcache = res[part]["DCache"]
         l2top = res[part]["L2Top"]
-        print(f"{part},{frontend},{backend},{memblock},{icache},{dcache},{l2top}")
+        buf += f"{part},{frontend},{backend},{memblock},{icache},{dcache},{l2top}\n"
+    with open(output_file, "w") as f:
+        f.write(buf)
 
 if __name__ == "__main__":
     yqh, nh, kmh, kmhv2, kmhv3 = dict(), dict(), dict(), dict(), dict()
@@ -215,6 +219,5 @@ if __name__ == "__main__":
     cal_src_count(kmh_src, kmh_scala_count, "/mnt/data/xs/xs-env/kunminghu/")
     cal_src_count(kmhv2_src, kmhv2_scala_count, "/mnt/data/xs/xs-env/kunminghu-v2/")
     cal_src_count(kmhv3_src, kmhv3_scala_count, "/mnt/data/xs/xs-env/XiangShan/")
-    cal_count(yqh_count, nh_count, kmh_count, kmhv2_count, kmhv3_count)
-    print("\nScala Source Line Count:")
-    cal_count(yqh_scala_count, nh_scala_count, kmh_scala_count, kmhv2_scala_count, kmhv3_scala_count)
+    cal_count(yqh_count, nh_count, kmh_count, kmhv2_count, kmhv3_count, "verilog.csv")
+    cal_count(yqh_scala_count, nh_scala_count, kmh_scala_count, kmhv2_scala_count, kmhv3_scala_count, "scala.csv")

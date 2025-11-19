@@ -8,8 +8,8 @@ FIRTOOL = ~/.cache/llvm-firtool/1.62.1/bin/firtool
 FIRTOOL_CHISEL7 = ~/.cache/llvm-firtool/1.135.0/bin/firtool
 FIRTOOL_OPTS = --split-verilog -O=release --disable-annotation-classless --disable-annotation-unknown
 
-result.csv: cal.py verilog/yanqihu/XSTop.sv verilog/nanhu/XSTop.sv verilog/kunminghu/XSTop.sv verilog/kunminghu_v2/XSTop.sv
-	./cal.py > result.csv
+verilog.csv: cal.py verilog/yanqihu/XSTop.sv verilog/nanhu/XSTop.sv verilog/kunminghu/XSTop.sv verilog/kunminghu_v2/XSTop.sv
+	./cal.py
 
 verilog/yanqihu/XSTop.sv: $(YQH_FIR)
 	mkdir -p verilog/yanqihu
