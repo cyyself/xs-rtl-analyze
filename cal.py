@@ -178,6 +178,14 @@ def cal_count(yqh_count, nh_count, kmh_count, kmhv2_count, kmhv3_count, output_f
     with open(output_file, "w") as f:
         f.write(buf)
 
+def count_modules(source_map):
+    modules = set()
+    for each_module in source_map.keys():
+        module_name = each_module.split("_")[0]
+        modules.add(module_name)
+    print(modules)
+    return len(modules)
+
 if __name__ == "__main__":
     yqh, nh, kmh, kmhv2, kmhv3 = dict(), dict(), dict(), dict(), dict()
     for path in pathlib.Path("verilog/yanqihu").rglob("*.sv"):
@@ -250,3 +258,8 @@ if __name__ == "__main__":
         buf = []
         output_in_tree(buf, kmhv3_hier, kmhv3_count, kmhv3_scala_count)
         f.write("\n".join(buf))
+    print(f"YQH modules: {count_modules(yqh_src)}")
+    print(f"NH modules: {count_modules(nh_src)}")
+    print(f"KMH modules: {count_modules(kmh_src)}")
+    print(f"KMHv2 modules: {count_modules(kmhv2_src)}")
+    print(f"KMHv3 modules: {count_modules(kmhv3_src)}")
