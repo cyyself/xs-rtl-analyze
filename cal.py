@@ -127,54 +127,48 @@ def cal_count(yqh_count, nh_count, kmh_count, kmhv2_count, kmhv3_count, output_f
             "Frontend": yqh_count["Frontend"] - yqh_count["ICache"],
             "Backend": yqh_count["XSCore"] - yqh_count["Frontend"] - yqh_count["MemBlock"],
             "MemBlock": yqh_count["MemBlock"],
-            "ICache": yqh_count["ICache"],
-            "DCache": yqh_count["DCache"],
-            "L2Top": yqh_count["InclusiveCache"]
+            "L1Cache": yqh_count["ICache"] + yqh_count["DCache"],
+            "L2Cache": yqh_count["InclusiveCache"]
         },
         "nh": {
             "Frontend": nh_count["Frontend"] - nh_count["ICache"],
             "Backend": nh_count["XSCore"] - nh_count["Frontend"] - nh_count["MemBlock"],
             "MemBlock": nh_count["MemBlock"],
-            "ICache": nh_count["ICache"],
-            "DCache": nh_count["DCache"],
-            "L2Top": nh_count["HuanCun"]
+            "L1Cache": nh_count["ICache"] + nh_count["DCache"],
+            "L2Cache": nh_count["HuanCun"]
         },
         "kmh": {
             "Frontend": kmh_count["Frontend"] - kmh_count["ICache"],
             "Backend": kmh_count["Backend"],
             "MemBlock": kmh_count["MemBlock"] - kmh_count["DCacheWrapper"],
-            "ICache": kmh_count["ICache"],
-            "DCache": kmh_count["DCacheWrapper"],
-            "L2Top": kmh_count["L2Top"]
+            "L1Cache": kmh_count["ICache"] + kmh_count["DCacheWrapper"],
+            "L2Cache": kmh_count["L2Top"]
         },
         "kmhv2": {
             "Frontend": kmhv2_count["Frontend"] - kmhv2_count["ICache"],
             "Backend": kmhv2_count["Backend"],
             "MemBlock": kmhv2_count["MemBlock"] - kmhv2_count["DCacheWrapper"],
-            "ICache": kmhv2_count["ICache"],
-            "DCache": kmhv2_count["DCacheWrapper"],
-            "L2Top": kmhv2_count["L2Top"]
+            "L1Cache": kmhv2_count["ICache"] + kmhv2_count["DCacheWrapper"],
+            "L2Cache": kmhv2_count["L2Top"]
         },
         "kmhv3": {
             "Frontend": kmhv3_count["Frontend"] - kmhv3_count["ICache"],
             "Backend": kmhv3_count["Backend"],
             "MemBlock": kmhv3_count["MemBlock"] - kmhv3_count["DCacheWrapper"],
-            "ICache": kmhv3_count["ICache"],
-            "DCache": kmhv3_count["DCacheWrapper"],
-            "L2Top": kmhv3_count["L2Top"]
+            "L1Cache": kmhv3_count["ICache"] + kmhv3_count["DCacheWrapper"],
+            "L2Cache": kmhv3_count["L2Top"]
         },
     }
     # output in csv
     buf = ""
-    buf += "Part,Frontend,Backend,MemBlock,ICache,DCache,L2Top\n"
+    buf += "Part,Frontend,Backend,MemBlock,L1Cache,L2Cache\n"
     for part in ["yqh", "nh", "kmh", "kmhv2", "kmhv3"]:
         frontend = res[part]["Frontend"]
         backend = res[part]["Backend"]
         memblock = res[part]["MemBlock"]
-        icache = res[part]["ICache"]
-        dcache = res[part]["DCache"]
-        l2top = res[part]["L2Top"]
-        buf += f"{part},{frontend},{backend},{memblock},{icache},{dcache},{l2top}\n"
+        l1cache = res[part]["L1Cache"]
+        l2cache = res[part]["L2Cache"]
+        buf += f"{part},{frontend},{backend},{memblock},{l1cache},{l2cache}\n"
     with open(output_file, "w") as f:
         f.write(buf)
 
