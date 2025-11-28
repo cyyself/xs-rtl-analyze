@@ -2,14 +2,19 @@ YQH_FIR = ../yanqihu/build/rtl/XSTop.fir # git checkout 52bb30fe05350d4756db2626
 NH_FIR = ../nanhu/build/rtl/XSTop.fir # git checkout ffee184f3d83a9adb2730090d7754bb48b2f33eb && make verilog
 KMH_FIR = ../kunminghu/build/XSTop.fir # git checkout 533652847a406411557b4b8cd1b7c3e7f3712ca6 && make verilog MFC=1
 KMHV2_FIR = ../kunminghu-v2/build/rtl/XSTop.fir # git checkout 316d62e5952bb47fd7224b5fcf4591813a05e08a && make verilog
-KMHV3_FIR = ../XiangShan/build/rtl/XSTop.fir # git checkout 93e4c986cb705ce6b741ef4b98eb50923c25d369 && make verilog
+KMHV3_FIR = ../kunminghu-v3/build/rtl/XSTop.fir # git checkout 93e4c986cb705ce6b741ef4b98eb50923c25d369 && make verilog
 
 FIRTOOL = ~/.cache/llvm-firtool/1.62.1/bin/firtool
 FIRTOOL_CHISEL7 = ~/.cache/llvm-firtool/1.135.0/bin/firtool
 FIRTOOL_OPTS = --split-verilog -O=release --disable-annotation-classless --disable-annotation-unknown
 
+all: scala-new.csv verilog.csv
+
 verilog.csv: cal.py verilog/yanqihu/XSTop.sv verilog/nanhu/XSTop.sv verilog/kunminghu/XSTop.sv verilog/kunminghu_v2/XSTop.sv
 	./cal.py
+
+scala-new.csv: cal-scala.py
+	./cal-scala.py > scala-new.csv
 
 verilog/yanqihu/XSTop.sv: $(YQH_FIR)
 	mkdir -p verilog/yanqihu

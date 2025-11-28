@@ -2,6 +2,7 @@
 
 import pathlib
 import sys
+import json
 
 def split_src(text):
     res = dict()
@@ -161,7 +162,7 @@ def cal_count(yqh_count, nh_count, kmh_count, kmhv2_count, kmhv3_count, output_f
     }
     # output in csv
     buf = ""
-    buf += "Part,Frontend,Backend,MemBlock,L1Cache,L2Cache\n"
+    buf += "Architecture,Frontend,Backend,MemBlock,L1Cache,L2Cache\n"
     for part in ["yqh", "nh", "kmh", "kmhv2", "kmhv3"]:
         frontend = res[part]["Frontend"]
         backend = res[part]["Backend"]
@@ -219,6 +220,21 @@ if __name__ == "__main__":
     count_flat("XSTop", kmh_hier, kmh_scala, kmh_verilog, kmh_src)
     count_flat("XSTop", kmhv2_hier, kmhv2_scala, kmhv2_verilog, kmhv2_src)
     count_flat("XSTop", kmhv3_hier, kmhv3_scala, kmhv3_verilog, kmhv3_src)
+    with open("yqh_src.json", "w") as f:
+        yqh_src_list = {k: sorted(list(v)) for k, v in yqh_src.items()}
+        json.dump(yqh_src_list, f, indent=2)
+    with open("nh_src.json", "w") as f:
+        nh_src_list = {k: sorted(list(v)) for k, v in nh_src.items()}
+        json.dump(nh_src_list, f, indent=2)
+    with open("kmh_src.json", "w") as f:
+        kmh_src_list = {k: sorted(list(v)) for k, v in kmh_src.items()} 
+        json.dump(kmh_src_list, f, indent=2)
+    with open("kmhv2_src.json", "w") as f:
+        kmhv2_src_list = {k: sorted(list(v)) for k, v in kmhv2_src.items()}
+        json.dump(kmhv2_src_list, f, indent=2)
+    with open("kmhv3_src.json", "w") as f:
+        kmhv3_src_list = {k: sorted(list(v)) for k, v in kmhv3_src.items()}
+        json.dump(kmhv3_src_list, f, indent=2)
     yqh_scala_count, nh_scala_count, kmh_scala_count, kmhv2_scala_count, kmhv3_scala_count = dict(), dict(), dict(), dict(), dict()
     cal_src_count(yqh_src, yqh_scala_count, "/mnt/data/xs/xs-env/yanqihu/")
     cal_src_count(nh_src, nh_scala_count, "/mnt/data/xs/xs-env/nanhu/")
